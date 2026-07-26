@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Power Status Tracking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0; /* Light grey header */
+      font-weight: bold;
+    }
+
+    th:last-child {
+      border-bottom: 4px solid red;
+    }
+
+    .green {
+      background-color: #8fce00;
+      color: black;
+    }
+
+    .red {
+      background-color: #ff4c4c;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Power Status Tracking</h2>
+
+<table id="dataTable">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Location</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Telephone</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqZCOjh56_HsPIMMAn7aW6JVeIOw1xMVOUe2Xp2qVjsdf3YAGJ3rvvygX_hR2EbxPVv_PTqcJk2wAr/pub?output=csv";
+
+function loadTableData() {
+  fetch(csvUrl)
+    .then(response => response.text())
+    .then(csvText => {
+      const rows = csvText.trim().split("\n").map(r => r.split(","));
+      const tbody = document.querySelector("#dataTable tbody");
+      tbody.innerHTML = ""; // Clear old rows
+
+      for (let i = 1; i < rows.length; i++) {
+        const tr = document.createElement("tr");
+        for (let j = 0; j < 6; j++) {
+          const td = document.createElement("td");
+          const text = rows[i][j] || "";
+
+          if (j === 5) {
+            const status = text.trim().toUpperCase();
+            if (status === "IN SERVICE") {
+              td.classList.add("green");
+            } else if (status === "OUT OF SERVICE") {
+              td.classList.add("red");
+            }
+          }
+
+          td.textContent = text;
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+    })
+    .catch(error => {
+      console.error("Error loading CSV:", error);
+    });
+}
+
+// Initial load
+loadTableData();
+
+// 🔁 Auto-refresh every 10 seconds
+setInterval(loadTableData, 10000);
+</script>
+
+</body>
+</html>
