@@ -1,113 +1,432 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Power Status Tracking</title>
+  <meta charset="utf-8" />
+  <title>POTTER HOSPITAL — Queue Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1273de" />
+  <link rel="icon" href="https://i.postimg.cc/Mp4QybPv/potter-hos.png" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+    :root{
+      /* Tinted palette (reduced whites) */
+      --brand:#1273de; --brand-2:#0f63c4;
+      --ok:#1c8f63; --danger:#cc2f3f;
+
+      --page:#dfe8f4;
+      --band:#d6e3f6;
+      --card-top:#f2f7ff;
+      --card-bot:#e8f1ff;
+      --card-accent:#d0e2ff;
+      --border:#c7d7eb;
+      --text:#122036;
+      --text-2:#31455f;
+      --muted:#5b6e88;
+      --chip:#e9f2ff;
+      --chip-border:#c7dfff;
+
+      --shadow:0 10px 22px rgba(16, 76, 140, .10);
+
+      /* Fixed footer height */
+      --footer-h: 104px;
     }
 
-    h2 {
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 20px;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+      color:var(--text-2);
+      background:
+        radial-gradient(900px 420px at 12% -10%, rgba(18,115,222,.20), transparent 60%),
+        radial-gradient(780px 360px at 92% -12%, rgba(18,115,222,.14), transparent 60%),
+        var(--page);
+      /* make room for fixed footer */
+      padding-bottom: var(--footer-h);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    main{flex:1 0 auto;}
+
+    /* ===== Header (tinted) ===== */
+    .site-header{
+      position:sticky; top:0; z-index:10;
+      background:linear-gradient(180deg, #e9f2ff, #e1edff);
+      border-bottom:1px solid var(--border);
+      box-shadow:0 2px 6px rgba(16,76,140,.08);
+    }
+    .header-inner{
+      max-width:1200px; margin:0 auto; padding:14px 20px;
+      display:flex; align-items:center; gap:18px;
+    }
+    .logo{width:46px; height:46px; border-radius:10px; overflow:hidden; flex:0 0 auto; background:#e3efff; border:1px solid #cfe0fb}
+    .logo img{width:100%; height:100%; object-fit:contain}
+    .brand{display:flex; flex-direction:column}
+    .brand h1{margin:0; font-size:1.2rem; color:var(--text); letter-spacing:.2px}
+    .brand small{color:var(--muted)}
+    .spacer{flex:1}
+    .nav{display:flex; gap:28px; align-items:center; flex-wrap:wrap}
+    .nav button{
+      appearance:none; background:none; border:0; padding:12px 4px;
+      font-weight:800; letter-spacing:.4px; color:#274165; cursor:pointer; position:relative;
+    }
+    .nav button:hover{color:var(--brand)}
+    .nav button.active{color:var(--brand)}
+    .nav button.active::after{
+      content:""; position:absolute; left:0; right:0; bottom:-9px; height:3px;
+      background:var(--brand); border-radius:3px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
+    /* ===== Hero ===== */
+    .hero{
+      background:linear-gradient(180deg, #e6f0ff, #deebff);
+      border-bottom:1px solid var(--border);
+    }
+    .hero-inner{
+      max-width:1200px; margin:0 auto; padding:20px 20px 24px;
+      display:flex; justify-content:space-between; align-items:end; gap:16px;
+    }
+    .hero h2{margin:0; color:#0f223a; font-size:1.55rem}
+    .hero p{margin:6px 0 0; color:#2c3e59}
+    .status-pill{
+      padding:8px 12px; border-radius:999px; font-weight:700;
+      border:1px solid var(--chip-border); background:var(--chip); color:#0e2744;
+      box-shadow:0 2px 6px rgba(16,76,140,.08);
+    }
+    .status-ok{border-color:rgba(28,143,99,.28); color:#0f4f37; background:#dbf3e7}
+    .status-bad{border-color:rgba(204,47,63,.28); color:#6b1c24; background:#ffe1e5}
+
+    /* ===== Band / Cards ===== */
+    .band{background:var(--band); border-top:1px solid var(--border)}
+    .container{max-width:1200px; margin:0 auto; padding:20px}
+    .grid{display:grid; grid-template-columns:1.2fr .8fr; gap:18px}
+    .stack{display:grid; gap:18px}
+
+    .card{
+      background:linear-gradient(180deg, var(--card-top), var(--card-bot));
+      border:1px solid var(--border); border-radius:14px;
+      box-shadow:var(--shadow); padding:16px;
+    }
+    .card h3{margin:0 0 10px; color:#0f223a; font-size:1.05rem}
+
+    .stat{display:flex; gap:14px; align-items:center; padding:12px 14px; border-radius:12px; border:1px dashed var(--card-accent); background:#edf5ff}
+    .big-num{font-size:2.4rem; font-weight:800; color:#0f223a}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+
+    .btn{
+      appearance:none; border:1px solid var(--border); background:#eaf2ff; color:#102341;
+      padding:12px 16px; border-radius:10px; font-weight:800; cursor:pointer; transition:.15s;
+      box-shadow:0 1px 0 rgba(16,76,140,.10);
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:var(--brand); color:#fff; border-color:var(--brand-2)}
+    .btn-primary:hover{background:var(--brand-2)}
+    .btn-danger{background:#cc2f3f; color:#fff; border-color:#b02835}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .grow{flex:1}
+    .input{
+      background:#f0f6ff; border:1px solid var(--border); color:var(--text);
+      padding:12px; border-radius:10px; width:100%;
     }
 
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
+    table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid var(--border); border-radius:12px; overflow:hidden}
+    thead th{
+      background:#d9e8ff; color:#0f223a; font-weight:800; font-size:.92rem;
+      border-bottom:1px solid var(--border);
+    }
+    th,td{text-align:left; padding:10px 12px}
+    tbody tr{border-bottom:1px solid var(--border)}
+    tbody tr:nth-child(odd){background:#f3f8ff}
+    tbody tr:nth-child(even){background:#ebf3ff}
+    tbody tr:hover{background:#e1efff}
+
+    .tabs-content>section{display:none}
+    .tabs-content>section.active{display:block}
+
+    /* ===== Fixed Footer (always visible & centered vertical list) ===== */
+    footer{
+      position:fixed; left:0; right:0; bottom:0; z-index:20;
+      background:#d7e9ff;
+      border-top:1px solid #c5dcff;
+      box-shadow:0 -2px 10px rgba(16,76,140,.08);
+      min-height:var(--footer-h);
+    }
+    .footer-inner{
+      max-width:1200px; margin:0 auto; padding:14px 20px;
+      display:flex; flex-direction:column;
+      align-items:center;          /* center horizontally */
+      justify-content:center;      /* center vertically */
+      gap:10px;
+      text-align:center;           /* center text lines */
+      color:#0e2744; font-size:.95rem;
     }
 
-    th {
-      background-color: #f0f0f0; /* Light grey header */
-      font-weight: bold;
-    }
-
-    th:last-child {
-      border-bottom: 4px solid red;
-    }
-
-    .green {
-      background-color: #8fce00;
-      color: black;
-    }
-
-    .red {
-      background-color: #ff4c4c;
-      color: white;
-    }
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} .hero-inner{align-items:start} }
   </style>
 </head>
 <body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo"><img src="https://i.postimg.cc/Mp4QybPv/potter-hos.png" alt="Potter Hospital logo" /></div>
+      <div class="brand">
+        <h1>Potter Hospital</h1>
+        <small>Queue Dashboard</small>
+      </div>
+      <div class="spacer"></div>
+      <nav class="nav" role="tablist" aria-label="Sections">
+        <button class="active" data-tab="overview" role="tab" aria-selected="true">HOME</button>
+        <button data-tab="waiting" role="tab">WAITING</button>
+        <button data-tab="history" role="tab">HISTORY</button>
+        <button data-tab="admin" role="tab">ADMIN</button>
+      </nav>
+    </div>
+  </header>
 
-<h2>Power Status Tracking</h2>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <h2>Hospital Queue — Live Control</h2>
+        <p>Monitor waiting list, call next patient, and record names in real time.</p>
+      </div>
+      <div id="espPill" class="status-pill">Checking device…</div>
+    </div>
+  </section>
 
-<table id="dataTable">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Location</th>
-      <th>Date</th>
-      <th>Time</th>
-      <th>Telephone</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <!-- Content -->
+  <div class="band">
+    <main class="container tabs-content">
+      <!-- Overview -->
+      <section id="overview" class="active">
+        <div class="grid">
+          <div class="stack">
+            <div class="card">
+              <h3>Now Servicing</h3>
+              <div id="servicingCard"><div style="color:#4b5f79">No patient being serviced.</div></div>
+            </div>
+            <div class="card">
+              <h3>Controls</h3>
+              <div class="row" style="gap:12px;">
+                <button id="btnCall" class="btn btn-primary"> Call Next Patient</button>
+                <button id="btnRefresh" class="btn">⟳ Refresh</button>
+              </div>
+              <div style="margin-top:10px; color:#2a3e59;">
+                Last updated: <span id="lastUpdated">–</span> &nbsp;•&nbsp; Waiting: <span id="waitingCount">0</span>
+              </div>
+            </div>
+          </div>
 
-<script>
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqZCOjh56_HsPIMMAn7aW6JVeIOw1xMVOUe2Xp2qVjsdf3YAGJ3rvvygX_hR2EbxPVv_PTqcJk2wAr/pub?output=csv";
+          <div class="card">
+            <h3>Next in Line</h3>
+            <div id="nextList" class="stack"></div>
+          </div>
+        </div>
+      </section>
 
-function loadTableData() {
-  fetch(csvUrl)
-    .then(response => response.text())
-    .then(csvText => {
-      const rows = csvText.trim().split("\n").map(r => r.split(","));
-      const tbody = document.querySelector("#dataTable tbody");
-      tbody.innerHTML = ""; // Clear old rows
+      <!-- Waiting -->
+      <section id="waiting">
+        <div class="card">
+          <h3>Waiting List (positions only)</h3>
+          <table aria-label="Waiting List">
+            <thead><tr><th style="width:160px;">Patient No.</th><th>Status</th></tr></thead>
+            <tbody id="waitingTable"></tbody>
+          </table>
+        </div>
+      </section>
 
-      for (let i = 1; i < rows.length; i++) {
-        const tr = document.createElement("tr");
-        for (let j = 0; j < 6; j++) {
-          const td = document.createElement("td");
-          const text = rows[i][j] || "";
+      <!-- History -->
+      <section id="history">
+        <div class="card">
+          <h3>Recently Serviced</h3>
+          <table aria-label="History">
+            <thead><tr><th>Time</th><th>Patient No.</th><th>Phone</th><th>Name</th></tr></thead>
+            <tbody id="historyTable"><tr><td colspan="4">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
 
-          if (j === 5) {
-            const status = text.trim().toUpperCase();
-            if (status === "IN SERVICE") {
-              td.classList.add("green");
-            } else if (status === "OUT OF SERVICE") {
-              td.classList.add("red");
-            }
-          }
+      <!-- Admin -->
+      <section id="admin">
+        <div class="card">
+          <h3>Reset Queue</h3>
+          <p style="color:#3a4a63;">Clears the entire queue both on the device and in the sheet (keeps headers). Action cannot be undone.</p>
+          <button id="btnReset" class="btn btn-danger"> Reset Queue</button>
+        </div>
+      </section>
+    </main>
+  </div>
 
-          td.textContent = text;
-          tr.appendChild(td);
-        }
-        tbody.appendChild(tr);
+  <!-- Fixed Footer (centered & vertical) -->
+  <footer>
+    <div class="footer-inner">
+      <div>Hospital Queue System</div>
+      <div>Gilbert's Final Year Project</div>
+      <div>© <span id="year"></span> Potter Hospital</div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" style="position:fixed; right:18px; bottom:calc(var(--footer-h) + 12px); background:#1c8f63; color:#fff; padding:10px 14px; border-radius:10px; box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:.25s">Saved.</div>
+
+  <script>
+    // ====== CONFIG ======
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzpEddjO2gD0bdy6EMulQA4z7ULjuMm9wqH8uN7CgHqC4W8vjth4ARESMiHZzSoUfON/exec";
+    const DEVICE_ID = "esp1";
+    const AUTO_REFRESH_MS = 3000;
+
+    // ====== JSONP helper ======
+    function jsonp(params = {}) {
+      return new Promise((resolve) => {
+        const cb = "cb_" + Math.random().toString(36).slice(2);
+        params.callback = cb;
+        const qs = Object.keys(params).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join("&");
+        const s = document.createElement("script");
+        s.src = `${GAS_URL}?${qs}`;
+        window[cb] = (data) => { try { resolve(data); } finally { delete window[cb]; s.remove(); } };
+        s.onerror = () => { try { resolve({ ok:false, error:"network" }); } finally { delete window[cb]; s.remove(); } };
+        document.head.appendChild(s);
+      });
+    }
+
+    let autoTimer = null;
+
+    async function fetchState() {
+      const data = await jsonp({ op: "state" });
+      if (!data || data.ok === false) return;
+      renderState(data);
+    }
+    async function fetchHistory(limit = 50) {
+      const data = await jsonp({ op: "history", limit });
+      if (Array.isArray(data)) renderHistory(data);
+    }
+    async function sendCommand(type, extra = {}) {
+      const res = await jsonp({ op: "cmd", type, device: DEVICE_ID, ...extra });
+      return res && res.ok;
+    }
+
+    function renderState(s) {
+      const pill = document.getElementById("espPill");
+      pill.textContent = s.esp_online ? "Device Online" : "Device Offline";
+      pill.className = "status-pill " + (s.esp_online ? "status-ok" : "status-bad");
+
+      const sc = document.getElementById("servicingCard");
+      sc.innerHTML = "";
+      if (s.servicing) {
+        const { position, phone, name } = s.servicing;
+        sc.appendChild(el("div", { class: "stat" }, [
+          el("div", { class: "big-num mono" }, `#${position}`),
+          el("div", {}, [
+            el("div", {}, "Patient Number"),
+            el("div", { class:"mono" }, phone ? `📞 ${phone}` : "No phone")
+          ])
+        ]));
+        sc.appendChild(el("div", { class: "row", style:"margin-top:12px;" }, [
+          el("input", { id:"nameInput", class:"input grow", placeholder:"Enter patient name…", value: (name||"") }),
+          el("button", { id:"btnSaveName", class:"btn" }, "💾 Save Name")
+        ]));
+        document.getElementById("btnSaveName").onclick = async () => {
+          const val = document.getElementById("nameInput").value.trim();
+          if (!val) { toast("Enter a name first"); return; }
+          const ok = await sendCommand("SET_NAME", { name: val });
+          if (ok) { toast("Name saved"); await fetchState(); } else toast("Failed to save");
+        };
+      } else {
+        sc.appendChild(document.createTextNode("No patient being serviced."));
       }
-    })
-    .catch(error => {
-      console.error("Error loading CSV:", error);
+
+      const nextList = document.getElementById("nextList");
+      nextList.innerHTML = "";
+      if (s.waiting && s.waiting.length) {
+        s.waiting.slice(0, 5).forEach(w => {
+          nextList.appendChild(el("div", { class: "stat" }, [
+            el("div", { class:"big-num mono", style:"font-size:1.8rem;" }, `#${w.position}`),
+            el("div", {}, "Waiting")
+          ]));
+        });
+      } else {
+        nextList.appendChild(document.createTextNode("No one is waiting."));
+      }
+
+      const tb = document.getElementById("waitingTable");
+      tb.innerHTML = "";
+      if (s.waiting && s.waiting.length) {
+        s.waiting.forEach(w => {
+          const tr = document.createElement("tr");
+          tr.appendChild(td(`#${w.position}`, "mono"));
+          tr.appendChild(td("waiting"));
+          tb.appendChild(tr);
+        });
+      } else {
+        const tr = document.createElement("tr");
+        tr.appendChild(td("No waiting patients.", "", { colspan:2 }));
+        tb.appendChild(tr);
+      }
+
+      document.getElementById("waitingCount").textContent = (s.counts && s.counts.waiting) || 0;
+      document.getElementById("lastUpdated").textContent = new Date().toLocaleTimeString();
+    }
+
+    function renderHistory(rows) {
+      const tbody = document.getElementById("historyTable");
+      tbody.innerHTML = "";
+      if (!rows.length) {
+        const tr = document.createElement("tr");
+        tr.appendChild(td("No history yet.", "", { colspan:4 }));
+        tbody.appendChild(tr);
+        return;
+      }
+      rows.slice(-100).forEach(r => {
+        const tr = document.createElement("tr");
+        tr.appendChild(td(formatTime(r.timestamp)));
+        tr.appendChild(td("#"+r.patientNumber, "mono"));
+        tr.appendChild(td(r.phone || "", "mono"));
+        tr.appendChild(td(r.name || "", "mono"));
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Helpers
+    function el(tag, attrs={}, children=[]){
+      const n = document.createElement(tag);
+      for (const k in attrs){ if (k==="class") n.className=attrs[k]; else if (k==="style") n.setAttribute("style",attrs[k]); else n.setAttribute(k,attrs[k]); }
+      (Array.isArray(children)?children:[children]).forEach(c=> n.appendChild(typeof c==="string"?document.createTextNode(c):c));
+      return n;
+    }
+    function td(text, cls="", extra={}){ const n=document.createElement("td"); if(cls)n.className=cls; if(extra.colspan) n.colSpan=extra.colspan; n.textContent=text; return n; }
+    function formatTime(t){ try{ return new Date(t).toLocaleString(); }catch(e){ return String(t); } }
+    function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.style.opacity=1; t.style.transform="translateY(0)"; setTimeout(()=>{t.style.opacity=0; t.style.transform="translateY(10px)";},1600); }
+
+    // Events
+    document.getElementById("btnCall").onclick = async () => {
+      const btn = document.getElementById("btnCall"); btn.disabled = true;
+      const ok = await sendCommand("CALL");
+      if (ok) { toast("Calling next patient…"); await fetchState(); } else toast("Failed to send command");
+      setTimeout(()=> btn.disabled = false, 900);
+    };
+    document.getElementById("btnReset").onclick = async () => {
+      if (!confirm("Reset the entire queue? This cannot be undone.")) return;
+      const ok = await sendCommand("RESET");
+      if (ok) { toast("Queue reset requested"); await fetchState(); fetchHistory(); } else toast("Failed to send RESET");
+    };
+    document.getElementById("btnRefresh").onclick = () => fetchState();
+
+    // Tabs
+    document.querySelectorAll(".nav button").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        const id = b.dataset.tab;
+        document.querySelectorAll(".tabs-content > section").forEach(s=>s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        if (id === "history") fetchHistory(80);
+      });
     });
-}
 
-// Initial load
-loadTableData();
-
-// 🔁 Auto-refresh every 10 seconds
-setInterval(loadTableData, 10000);
-</script>
-
+    // Auto refresh
+    function startAuto(){ if (autoTimer) clearInterval(autoTimer); autoTimer = setInterval(fetchState, AUTO_REFRESH_MS); }
+    document.getElementById("year").textContent = new Date().getFullYear();
+    fetchState(); startAuto();
+  </script>
 </body>
 </html>
