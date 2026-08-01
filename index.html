@@ -1,432 +1,70 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Out Patient Queue Management System — Queue Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#1273de" />
-  <link rel="icon" href="https://i.postimg.cc/1X6tzXMv/Chat-GPT-Image-Jul-27-2026-04-46-12-AM.png" />
-  <style>
-    :root{
-      /* Tinted palette (reduced whites) */
-      --brand:#1273de; --brand-2:#0f63c4;
-      --ok:#1c8f63; --danger:#cc2f3f;
-
-      --page:#dfe8f4;
-      --band:#d6e3f6;
-      --card-top:#f2f7ff;
-      --card-bot:#e8f1ff;
-      --card-accent:#d0e2ff;
-      --border:#c7d7eb;
-      --text:#122036;
-      --text-2:#31455f;
-      --muted:#5b6e88;
-      --chip:#e9f2ff;
-      --chip-border:#c7dfff;
-
-      --shadow:0 10px 22px rgba(16, 76, 140, .10);
-
-      /* Fixed footer height */
-      --footer-h: 104px;
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
-      color:var(--text-2);
-      background:
-        radial-gradient(900px 420px at 12% -10%, rgba(18,115,222,.20), transparent 60%),
-        radial-gradient(780px 360px at 92% -12%, rgba(18,115,222,.14), transparent 60%),
-        var(--page);
-      /* make room for fixed footer */
-      padding-bottom: var(--footer-h);
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-    }
-    main{flex:1 0 auto;}
-
-    /* ===== Header (tinted) ===== */
-    .site-header{
-      position:sticky; top:0; z-index:10;
-      background:linear-gradient(180deg, #e9f2ff, #e1edff);
-      border-bottom:1px solid var(--border);
-      box-shadow:0 2px 6px rgba(16,76,140,.08);
-    }
-    .header-inner{
-      max-width:1200px; margin:0 auto; padding:14px 20px;
-      display:flex; align-items:center; gap:18px;
-    }
-    .logo{width:46px; height:46px; border-radius:10px; overflow:hidden; flex:0 0 auto; background:#e3efff; border:1px solid #cfe0fb}
-    .logo img{width:100%; height:100%; object-fit:contain}
-    .brand{display:flex; flex-direction:column}
-    .brand h1{margin:0; font-size:1.2rem; color:var(--text); letter-spacing:.2px}
-    .brand small{color:var(--muted)}
-    .spacer{flex:1}
-    .nav{display:flex; gap:28px; align-items:center; flex-wrap:wrap}
-    .nav button{
-      appearance:none; background:none; border:0; padding:12px 4px;
-      font-weight:800; letter-spacing:.4px; color:#274165; cursor:pointer; position:relative;
-    }
-    .nav button:hover{color:var(--brand)}
-    .nav button.active{color:var(--brand)}
-    .nav button.active::after{
-      content:""; position:absolute; left:0; right:0; bottom:-9px; height:3px;
-      background:var(--brand); border-radius:3px;
-    }
-
-    /* ===== Hero ===== */
-    .hero{
-      background:linear-gradient(180deg, #e6f0ff, #deebff);
-      border-bottom:1px solid var(--border);
-    }
-    .hero-inner{
-      max-width:1200px; margin:0 auto; padding:20px 20px 24px;
-      display:flex; justify-content:space-between; align-items:end; gap:16px;
-    }
-    .hero h2{margin:0; color:#0f223a; font-size:1.55rem}
-    .hero p{margin:6px 0 0; color:#2c3e59}
-    .status-pill{
-      padding:8px 12px; border-radius:999px; font-weight:700;
-      border:1px solid var(--chip-border); background:var(--chip); color:#0e2744;
-      box-shadow:0 2px 6px rgba(16,76,140,.08);
-    }
-    .status-ok{border-color:rgba(28,143,99,.28); color:#0f4f37; background:#dbf3e7}
-    .status-bad{border-color:rgba(204,47,63,.28); color:#6b1c24; background:#ffe1e5}
-
-    /* ===== Band / Cards ===== */
-    .band{background:var(--band); border-top:1px solid var(--border)}
-    .container{max-width:1200px; margin:0 auto; padding:20px}
-    .grid{display:grid; grid-template-columns:1.2fr .8fr; gap:18px}
-    .stack{display:grid; gap:18px}
-
-    .card{
-      background:linear-gradient(180deg, var(--card-top), var(--card-bot));
-      border:1px solid var(--border); border-radius:14px;
-      box-shadow:var(--shadow); padding:16px;
-    }
-    .card h3{margin:0 0 10px; color:#0f223a; font-size:1.05rem}
-
-    .stat{display:flex; gap:14px; align-items:center; padding:12px 14px; border-radius:12px; border:1px dashed var(--card-accent); background:#edf5ff}
-    .big-num{font-size:2.4rem; font-weight:800; color:#0f223a}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
-
-    .btn{
-      appearance:none; border:1px solid var(--border); background:#eaf2ff; color:#102341;
-      padding:12px 16px; border-radius:10px; font-weight:800; cursor:pointer; transition:.15s;
-      box-shadow:0 1px 0 rgba(16,76,140,.10);
-    }
-    .btn:hover{transform:translateY(-1px)}
-    .btn-primary{background:var(--brand); color:#fff; border-color:var(--brand-2)}
-    .btn-primary:hover{background:var(--brand-2)}
-    .btn-danger{background:#cc2f3f; color:#fff; border-color:#b02835}
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-    .grow{flex:1}
-    .input{
-      background:#f0f6ff; border:1px solid var(--border); color:var(--text);
-      padding:12px; border-radius:10px; width:100%;
-    }
-
-    table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid var(--border); border-radius:12px; overflow:hidden}
-    thead th{
-      background:#d9e8ff; color:#0f223a; font-weight:800; font-size:.92rem;
-      border-bottom:1px solid var(--border);
-    }
-    th,td{text-align:left; padding:10px 12px}
-    tbody tr{border-bottom:1px solid var(--border)}
-    tbody tr:nth-child(odd){background:#f3f8ff}
-    tbody tr:nth-child(even){background:#ebf3ff}
-    tbody tr:hover{background:#e1efff}
-
-    .tabs-content>section{display:none}
-    .tabs-content>section.active{display:block}
-
-    /* ===== Fixed Footer (always visible & centered vertical list) ===== */
-    footer{
-      position:fixed; left:0; right:0; bottom:0; z-index:20;
-      background:#d7e9ff;
-      border-top:1px solid #c5dcff;
-      box-shadow:0 -2px 10px rgba(16,76,140,.08);
-      min-height:var(--footer-h);
-    }
-    .footer-inner{
-      max-width:1200px; margin:0 auto; padding:14px 20px;
-      display:flex; flex-direction:column;
-      align-items:center;          /* center horizontally */
-      justify-content:center;      /* center vertically */
-      gap:10px;
-      text-align:center;           /* center text lines */
-      color:#0e2744; font-size:.95rem;
-    }
-
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} .hero-inner{align-items:start} }
-  </style>
+<meta charset="utf-8" />
+<title>Hospital Queue Management System</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="theme-color" content="#1273de" />
+<link rel="icon" href="https://i.postimg.cc/1X6tzXMv/Chat-GPT-Image-Jul-27-2026-04-46-12-AM.png" />
+<style>
+:root{--brand:#1273de;--brand2:#0f63c4;--ok:#1c8f63;--warn:#c47a13;--danger:#cc2f3f;--page:#dfe8f4;--band:#d6e3f6;--card1:#f2f7ff;--card2:#e8f1ff;--border:#c7d7eb;--text:#122036;--muted:#5b6e88;--shadow:0 10px 22px rgba(16,76,140,.10);--footer:94px}
+*{box-sizing:border-box}html,body{min-height:100%}body{margin:0;padding-bottom:var(--footer);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#31455f;background:radial-gradient(900px 420px at 12% -10%,rgba(18,115,222,.20),transparent 60%),var(--page)}
+.site-header{position:sticky;top:0;z-index:10;background:linear-gradient(#e9f2ff,#e1edff);border-bottom:1px solid var(--border)}
+.header-inner,.hero-inner,.container,.footer-inner{max-width:1280px;margin:auto}.header-inner{padding:12px 18px;display:flex;align-items:center;gap:14px}.logo{width:46px;height:46px;border-radius:10px;overflow:hidden;border:1px solid var(--border)}.logo img{width:100%;height:100%;object-fit:contain}.brand h1{margin:0;color:var(--text);font-size:1.15rem}.brand small{color:var(--muted)}.spacer{flex:1}.nav{display:flex;gap:18px;flex-wrap:wrap}.nav button{border:0;background:none;padding:12px 3px;font-weight:800;color:#274165;cursor:pointer;position:relative}.nav button.active{color:var(--brand)}.nav button.active:after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:3px;background:var(--brand);border-radius:3px}
+.hero{background:linear-gradient(#e6f0ff,#deebff);border-bottom:1px solid var(--border)}.hero-inner{padding:18px;display:flex;align-items:end;justify-content:space-between;gap:12px}.hero h2{margin:0;color:var(--text)}.hero p{margin:5px 0 0}.pill,.badge{display:inline-flex;align-items:center;border-radius:999px;padding:7px 11px;font-weight:800;background:#e9f2ff;border:1px solid #c7dfff}.online{background:#dbf3e7;color:#0f4f37}.offline{background:#ffe1e5;color:#6b1c24}.badge{padding:4px 8px;font-size:.78rem}.waiting{background:#e7f0ff;color:#164b85}.servicing{background:#fff0c9;color:#6b4b00}.absent{background:#ffe1e5;color:#7c1f29}.appointment{background:#eee5ff;color:#52318d}.completed{background:#dcf4e8;color:#126443}
+.band{background:var(--band);min-height:500px}.container{padding:18px}.tabs-content>section{display:none}.tabs-content>section.active{display:block}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.stack{display:grid;gap:16px}.card{background:linear-gradient(var(--card1),var(--card2));border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px}.card h3{margin:0 0 11px;color:var(--text)}.stat{display:flex;gap:13px;align-items:center;padding:12px 14px;border-radius:12px;border:1px dashed #d0e2ff;background:#edf5ff}.big{font-size:2.1rem;font-weight:900;color:var(--text)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.grow{flex:1}.btn{border:1px solid var(--border);background:#eaf2ff;color:#102341;padding:10px 13px;border-radius:9px;font-weight:800;cursor:pointer}.btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}.primary{background:var(--brand);border-color:var(--brand2);color:#fff}.danger{background:var(--danger);border-color:#b02835;color:#fff}.success{background:var(--ok);border-color:#137451;color:#fff}.warn{background:var(--warn);border-color:#a5620c;color:#fff}.input,.select{width:100%;padding:10px;border-radius:9px;border:1px solid var(--border);background:#f5f9ff;color:var(--text)}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:11px;overflow:hidden;min-width:720px}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border)}thead th{background:#d9e8ff;color:var(--text)}tbody tr:nth-child(odd){background:#f3f8ff}tbody tr:nth-child(even){background:#ebf3ff}.actions{display:flex;gap:6px;flex-wrap:wrap}.actions .btn{padding:7px 9px;font-size:.82rem}.empty{text-align:center;color:var(--muted);padding:24px}.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.count-card{background:#edf5ff;border:1px solid var(--border);border-radius:12px;padding:12px}.count-card strong{display:block;color:var(--text);font-size:1.7rem}
+footer{position:fixed;bottom:0;left:0;right:0;z-index:20;background:#d7e9ff;border-top:1px solid #c5dcff}.footer-inner{min-height:var(--footer);padding:10px 18px;text-align:center;display:grid;place-content:center;gap:5px;color:#0e2744}.toast{position:fixed;right:18px;bottom:calc(var(--footer) + 12px);z-index:50;background:#1c8f63;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;transform:translateY(10px);transition:.25s}.toast.show{opacity:1;transform:none}.modal{position:fixed;inset:0;z-index:40;background:rgba(7,26,50,.45);display:none;place-items:center;padding:18px}.modal.open{display:grid}.modal-box{width:min(520px,100%);background:#f4f8ff;border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow)}.modal-box h3{margin-top:0}
+@media(max-width:950px){.grid{grid-template-columns:1fr}.counts{grid-template-columns:repeat(2,1fr)}.header-inner{align-items:flex-start}.nav{gap:11px}.hero-inner{align-items:flex-start}}@media(max-width:600px){.counts{grid-template-columns:1fr 1fr}.brand small{display:none}.nav{width:100%}.header-inner{flex-wrap:wrap}}
+</style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="logo"><img src="https://i.postimg.cc/1X6tzXMv/Chat-GPT-Image-Jul-27-2026-04-46-12-AM.png" alt="Jerome Hospital logo" /></div>
-      <div class="brand">
-        <h1>Out Patient Queue Management System</h1>
-        <small>Queue Dashboard</small>
-      </div>
-      <div class="spacer"></div>
-      <nav class="nav" role="tablist" aria-label="Sections">
-        <button class="active" data-tab="overview" role="tab" aria-selected="true">HOME</button>
-        <button data-tab="waiting" role="tab">WAITING</button>
-        <button data-tab="history" role="tab">HISTORY</button>
-        <button data-tab="admin" role="tab">ADMIN</button>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-inner">
-      <div>
-        <h2>Hospital Queue Management</h2>
-        <p>Monitor waiting list, call next patient, and record names in real time.</p>
-      </div>
-      <div id="espPill" class="status-pill">Checking device…</div>
-    </div>
-  </section>
-
-  <!-- Content -->
-  <div class="band">
-    <main class="container tabs-content">
-      <!-- Overview -->
-      <section id="overview" class="active">
-        <div class="grid">
-          <div class="stack">
-            <div class="card">
-              <h3>Now Servicing</h3>
-              <div id="servicingCard"><div style="color:#4b5f79">No patient being serviced.</div></div>
-            </div>
-            <div class="card">
-              <h3>Controls</h3>
-              <div class="row" style="gap:12px;">
-                <button id="btnCall" class="btn btn-primary"> Call Next Patient</button>
-                <button id="btnRefresh" class="btn">⟳ Refresh</button>
-              </div>
-              <div style="margin-top:10px; color:#2a3e59;">
-                Last updated: <span id="lastUpdated">–</span> &nbsp;•&nbsp; Waiting: <span id="waitingCount">0</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Next in Line</h3>
-            <div id="nextList" class="stack"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Waiting -->
-      <section id="waiting">
-        <div class="card">
-          <h3>Waiting List (positions only)</h3>
-          <table aria-label="Waiting List">
-            <thead><tr><th style="width:160px;">Patient No.</th><th>Status</th></tr></thead>
-            <tbody id="waitingTable"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- History -->
-      <section id="history">
-        <div class="card">
-          <h3>Recently Serviced</h3>
-          <table aria-label="History">
-            <thead><tr><th>Time</th><th>Patient No.</th><th>Phone</th><th>Name</th></tr></thead>
-            <tbody id="historyTable"><tr><td colspan="4">Loading…</td></tr></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Admin -->
-      <section id="admin">
-        <div class="card">
-          <h3>Reset Queue</h3>
-          <p style="color:#3a4a63;">Clears the entire queue both on the device and in the sheet (keeps headers). Action cannot be undone.</p>
-          <button id="btnReset" class="btn btn-danger"> Reset Queue</button>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Fixed Footer (centered & vertical) -->
-  <footer>
-    <div class="footer-inner">
-      <div>KABGAYI Level II Teaching Hospital</div>
-      <div>Jerome's Final Year Project</div>
-      <div>© <span id="year"></span> KABGAYI Level II Teaching Hospital</div>
-    </div>
-  </footer>
-
-  <!-- Toast -->
-  <div id="toast" style="position:fixed; right:18px; bottom:calc(var(--footer-h) + 12px); background:#1c8f63; color:#fff; padding:10px 14px; border-radius:10px; box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:.25s">Saved.</div>
-
-  <script>
-    // ====== CONFIG ======
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzpEddjO2gD0bdy6EMulQA4z7ULjuMm9wqH8uN7CgHqC4W8vjth4ARESMiHZzSoUfON/exec";
-    const DEVICE_ID = "esp1";
-    const AUTO_REFRESH_MS = 3000;
-
-    // ====== JSONP helper ======
-    function jsonp(params = {}) {
-      return new Promise((resolve) => {
-        const cb = "cb_" + Math.random().toString(36).slice(2);
-        params.callback = cb;
-        const qs = Object.keys(params).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join("&");
-        const s = document.createElement("script");
-        s.src = `${GAS_URL}?${qs}`;
-        window[cb] = (data) => { try { resolve(data); } finally { delete window[cb]; s.remove(); } };
-        s.onerror = () => { try { resolve({ ok:false, error:"network" }); } finally { delete window[cb]; s.remove(); } };
-        document.head.appendChild(s);
-      });
-    }
-
-    let autoTimer = null;
-
-    async function fetchState() {
-      const data = await jsonp({ op: "state" });
-      if (!data || data.ok === false) return;
-      renderState(data);
-    }
-    async function fetchHistory(limit = 50) {
-      const data = await jsonp({ op: "history", limit });
-      if (Array.isArray(data)) renderHistory(data);
-    }
-    async function sendCommand(type, extra = {}) {
-      const res = await jsonp({ op: "cmd", type, device: DEVICE_ID, ...extra });
-      return res && res.ok;
-    }
-
-    function renderState(s) {
-      const pill = document.getElementById("espPill");
-      pill.textContent = s.esp_online ? "Device Online" : "Device Offline";
-      pill.className = "status-pill " + (s.esp_online ? "status-ok" : "status-bad");
-
-      const sc = document.getElementById("servicingCard");
-      sc.innerHTML = "";
-      if (s.servicing) {
-        const { position, phone, name } = s.servicing;
-        sc.appendChild(el("div", { class: "stat" }, [
-          el("div", { class: "big-num mono" }, `#${position}`),
-          el("div", {}, [
-            el("div", {}, "Patient Number"),
-            el("div", { class:"mono" }, phone ? `📞 ${phone}` : "No phone")
-          ])
-        ]));
-        sc.appendChild(el("div", { class: "row", style:"margin-top:12px;" }, [
-          el("input", { id:"nameInput", class:"input grow", placeholder:"Enter patient name…", value: (name||"") }),
-          el("button", { id:"btnSaveName", class:"btn" }, "💾 Save Name")
-        ]));
-        document.getElementById("btnSaveName").onclick = async () => {
-          const val = document.getElementById("nameInput").value.trim();
-          if (!val) { toast("Enter a name first"); return; }
-          const ok = await sendCommand("SET_NAME", { name: val });
-          if (ok) { toast("Name saved"); await fetchState(); } else toast("Failed to save");
-        };
-      } else {
-        sc.appendChild(document.createTextNode("No patient being serviced."));
-      }
-
-      const nextList = document.getElementById("nextList");
-      nextList.innerHTML = "";
-      if (s.waiting && s.waiting.length) {
-        s.waiting.slice(0, 5).forEach(w => {
-          nextList.appendChild(el("div", { class: "stat" }, [
-            el("div", { class:"big-num mono", style:"font-size:1.8rem;" }, `#${w.position}`),
-            el("div", {}, "Waiting")
-          ]));
-        });
-      } else {
-        nextList.appendChild(document.createTextNode("No one is waiting."));
-      }
-
-      const tb = document.getElementById("waitingTable");
-      tb.innerHTML = "";
-      if (s.waiting && s.waiting.length) {
-        s.waiting.forEach(w => {
-          const tr = document.createElement("tr");
-          tr.appendChild(td(`#${w.position}`, "mono"));
-          tr.appendChild(td("waiting"));
-          tb.appendChild(tr);
-        });
-      } else {
-        const tr = document.createElement("tr");
-        tr.appendChild(td("No waiting patients.", "", { colspan:2 }));
-        tb.appendChild(tr);
-      }
-
-      document.getElementById("waitingCount").textContent = (s.counts && s.counts.waiting) || 0;
-      document.getElementById("lastUpdated").textContent = new Date().toLocaleTimeString();
-    }
-
-    function renderHistory(rows) {
-      const tbody = document.getElementById("historyTable");
-      tbody.innerHTML = "";
-      if (!rows.length) {
-        const tr = document.createElement("tr");
-        tr.appendChild(td("No history yet.", "", { colspan:4 }));
-        tbody.appendChild(tr);
-        return;
-      }
-      rows.slice(-100).forEach(r => {
-        const tr = document.createElement("tr");
-        tr.appendChild(td(formatTime(r.timestamp)));
-        tr.appendChild(td("#"+r.patientNumber, "mono"));
-        tr.appendChild(td(r.phone || "", "mono"));
-        tr.appendChild(td(r.name || "", "mono"));
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Helpers
-    function el(tag, attrs={}, children=[]){
-      const n = document.createElement(tag);
-      for (const k in attrs){ if (k==="class") n.className=attrs[k]; else if (k==="style") n.setAttribute("style",attrs[k]); else n.setAttribute(k,attrs[k]); }
-      (Array.isArray(children)?children:[children]).forEach(c=> n.appendChild(typeof c==="string"?document.createTextNode(c):c));
-      return n;
-    }
-    function td(text, cls="", extra={}){ const n=document.createElement("td"); if(cls)n.className=cls; if(extra.colspan) n.colSpan=extra.colspan; n.textContent=text; return n; }
-    function formatTime(t){ try{ return new Date(t).toLocaleString(); }catch(e){ return String(t); } }
-    function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.style.opacity=1; t.style.transform="translateY(0)"; setTimeout(()=>{t.style.opacity=0; t.style.transform="translateY(10px)";},1600); }
-
-    // Events
-    document.getElementById("btnCall").onclick = async () => {
-      const btn = document.getElementById("btnCall"); btn.disabled = true;
-      const ok = await sendCommand("CALL");
-      if (ok) { toast("Calling next patient…"); await fetchState(); } else toast("Failed to send command");
-      setTimeout(()=> btn.disabled = false, 900);
-    };
-    document.getElementById("btnReset").onclick = async () => {
-      if (!confirm("Reset the entire queue? This cannot be undone.")) return;
-      const ok = await sendCommand("RESET");
-      if (ok) { toast("Queue reset requested"); await fetchState(); fetchHistory(); } else toast("Failed to send RESET");
-    };
-    document.getElementById("btnRefresh").onclick = () => fetchState();
-
-    // Tabs
-    document.querySelectorAll(".nav button").forEach(b=>{
-      b.addEventListener("click", ()=>{
-        document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
-        b.classList.add("active");
-        const id = b.dataset.tab;
-        document.querySelectorAll(".tabs-content > section").forEach(s=>s.classList.remove("active"));
-        document.getElementById(id).classList.add("active");
-        if (id === "history") fetchHistory(80);
-      });
-    });
-
-    // Auto refresh
-    function startAuto(){ if (autoTimer) clearInterval(autoTimer); autoTimer = setInterval(fetchState, AUTO_REFRESH_MS); }
-    document.getElementById("year").textContent = new Date().getFullYear();
-    fetchState(); startAuto();
-  </script>
-</body>
-</html>
+<header class="site-header"><div class="header-inner"><div class="logo"><img src="https://i.postimg.cc/1X6tzXMv/Chat-GPT-Image-Jul-27-2026-04-46-12-AM.png" alt="Hospital logo"></div><div class="brand"><h1>Out Patient Queue Management System</h1><small>Clinical Queue Dashboard</small></div><div class="spacer"></div><nav class="nav">
+<button class="active" data-tab="overview">HOME</button><button data-tab="queue">QUEUE</button><button data-tab="absentTab">ABSENT</button><button data-tab="appointments">RENDEZ-VOUS</button><button data-tab="history">HISTORY</button><button data-tab="admin">ADMIN</button>
+</nav></div></header>
+<section class="hero"><div class="hero-inner"><div><h2>Hospital Queue Management</h2><p>Call, route, reschedule, and recall patients from one dashboard.</p></div><div id="espPill" class="pill">Checking device...</div></div></section>
+<div class="band"><main class="container tabs-content">
+<section id="overview" class="active"><div class="counts"><div class="count-card"><span>Waiting</span><strong id="countWaiting">0</strong></div><div class="count-card"><span>Absent</span><strong id="countAbsent">0</strong></div><div class="count-card"><span>Rendez-vous</span><strong id="countAppointments">0</strong></div><div class="count-card"><span>Completed</span><strong id="countCompleted">0</strong></div></div><div class="grid"><div class="stack"><div class="card"><h3>Now Servicing</h3><div id="servicingCard" class="empty">No patient being serviced.</div></div><div class="card"><h3>Controls</h3><div class="row"><button id="btnCall" class="btn primary">Call Next Patient</button><button id="btnRefresh" class="btn">Refresh</button></div><div style="margin-top:10px">Last updated: <span id="lastUpdated">-</span></div></div></div><div class="card"><h3>Next in Line</h3><div id="nextList" class="stack"></div></div></div></section>
+<section id="queue"><div class="card"><h3>Waiting Queue</h3><div class="table-wrap"><table><thead><tr><th>No.</th><th>Phone</th><th>Name</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead><tbody id="queueTable"></tbody></table></div></div></section>
+<section id="absentTab"><div class="card"><h3>Absent Patients</h3><p>Doctors can recall a patient from this list without losing the original ticket.</p><div class="table-wrap"><table><thead><tr><th>No.</th><th>Phone</th><th>Name</th><th>Marked absent</th><th>Actions</th></tr></thead><tbody id="absentTable"></tbody></table></div></div></section>
+<section id="appointments"><div class="card"><h3>Next Rendez-vous</h3><div class="table-wrap"><table><thead><tr><th>No.</th><th>Patient</th><th>Phone</th><th>Date and time</th><th>Reason</th><th>Actions</th></tr></thead><tbody id="appointmentTable"></tbody></table></div></div></section>
+<section id="history"><div class="card"><h3>Patient History</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>No.</th><th>Phone</th><th>Name</th><th>Destination</th><th>Status</th></tr></thead><tbody id="historyTable"><tr><td colspan="6">Loading...</td></tr></tbody></table></div></div></section>
+<section id="admin"><div class="card"><h3>Queue Administration</h3><p>The duplicate-number rule should reject a phone number that already has an active patient in waiting, servicing, absent, or rendez-vous status.</p><button id="btnReset" class="btn danger">Reset Queue</button></div></section>
+</main></div>
+<footer><div class="footer-inner"><div>KABGAYI Level II Teaching Hospital</div><div>Jerome's Final Year Project</div><div>© <span id="year"></span> KABGAYI Level II Teaching Hospital</div></div></footer>
+<div id="toast" class="toast">Saved</div>
+<div id="routeModal" class="modal"><div class="modal-box"><h3>Complete Treatment / Orient Patient</h3><input id="routeTicket" type="hidden"><label>Destination room</label><select id="routeRoom" class="select"><option value="consultation">Consultation</option><option value="laboratory">Laboratory</option><option value="pharmacy">Pharmacy</option><option value="completed">Discharge / Completed</option></select><div style="height:10px"></div><label>Clinical note (optional)</label><input id="routeNote" class="input" placeholder="Short note"><div class="row" style="margin-top:14px"><button id="routeSave" class="btn success">Save destination</button><button class="btn" data-close="routeModal">Cancel</button></div></div></div>
+<div id="appointmentModal" class="modal"><div class="modal-box"><h3>Set Next Rendez-vous</h3><input id="appointmentTicket" type="hidden"><label>Date and time</label><input id="appointmentDate" type="datetime-local" class="input"><div style="height:10px"></div><label>Reason</label><input id="appointmentReason" class="input" placeholder="Review, test results, follow-up..."><div class="row" style="margin-top:14px"><button id="appointmentSave" class="btn primary">Save rendez-vous</button><button class="btn" data-close="appointmentModal">Cancel</button></div></div></div>
+<script>
+const GAS_URL="https://script.google.com/macros/s/AKfycbzpEddjO2gD0bdy6EMulQA4z7ULjuMm9wqH8uN7CgHqC4W8vjth4ARESMiHZzSoUfON/exec";
+const DEVICE_ID="esp1",AUTO_REFRESH_MS=3000;
+let autoTimer=null,lastState={};
+function jsonp(params={}){return new Promise(resolve=>{const cb="cb_"+Math.random().toString(36).slice(2);params.callback=cb;const qs=Object.entries(params).map(([k,v])=>`${encodeURIComponent(k)}=${encodeURIComponent(v??"")}`).join("&");const s=document.createElement("script");s.src=`${GAS_URL}?${qs}`;window[cb]=data=>{try{resolve(data)}finally{delete window[cb];s.remove()}};s.onerror=()=>{try{resolve({ok:false,error:"network"})}finally{delete window[cb];s.remove()}};document.head.appendChild(s)})}
+async function sendCommand(type,extra={}){const r=await jsonp({op:"cmd",type,device:DEVICE_ID,...extra});return r&&r.ok}
+async function fetchState(){const d=await jsonp({op:"state"});if(!d||d.ok===false){toast("Unable to load queue",true);return}lastState=d;renderState(d)}
+async function fetchHistory(){const d=await jsonp({op:"history",limit:100});if(Array.isArray(d))renderHistory(d)}
+function activePatients(s){return [...(s.waiting||[]),...(s.absent||[]),...(s.appointments||[])];}
+function renderState(s){const pill=document.getElementById("espPill");pill.textContent=s.esp_online?"Device Online":"Device Offline";pill.className="pill "+(s.esp_online?"online":"offline");
+const waiting=s.waiting||[],absent=s.absent||[],appointments=s.appointments||[];setText("countWaiting",waiting.length);setText("countAbsent",absent.length);setText("countAppointments",appointments.length);setText("countCompleted",s.counts?.completed||s.counts?.serviced||0);setText("lastUpdated",new Date().toLocaleTimeString());renderServicing(s.servicing);renderNext(waiting);renderQueue(waiting);renderAbsent(absent);renderAppointments(appointments)}
+function renderServicing(p){const box=document.getElementById("servicingCard");box.innerHTML="";if(!p){box.className="empty";box.textContent="No patient being serviced.";return}box.className="";box.append(el("div",{class:"stat"},[el("div",{class:"big mono"},`#${p.position||p.ticket}`),el("div",{},[el("strong",{},p.name||"Patient name not recorded"),el("div",{class:"mono"},p.phone||"No phone"),el("span",{class:"badge servicing"},"servicing")])]));box.append(el("div",{class:"row",style:"margin-top:12px"},[el("input",{id:"nameInput",class:"input grow",placeholder:"Enter patient name",value:p.name||""}),button("Save Name",()=>saveName()),button("Absent",()=>markAbsent(p),"warn"),button("Route Patient",()=>openRoute(p),"success"),button("Set Rendez-vous",()=>openAppointment(p),"primary")]));}
+function renderNext(rows){const box=document.getElementById("nextList");box.innerHTML="";if(!rows.length){box.className="empty";box.textContent="No one is waiting.";return}box.className="stack";rows.slice(0,5).forEach(p=>box.append(el("div",{class:"stat"},[el("div",{class:"big mono",style:"font-size:1.6rem"},`#${p.position||p.ticket}`),el("div",{},p.name||p.phone||"Waiting patient")])))}
+function renderQueue(rows){renderPatientRows("queueTable",rows,p=>[td(`#${p.position||p.ticket}`,"mono"),td(p.phone||"", "mono"),td(p.name||""),td(formatTime(p.registeredAt||p.timestamp)),badgeCell("waiting"),actionCell([button("Call",()=>callPatient(p),"primary"),button("Absent",()=>markAbsent(p),"warn")])],6,"No waiting patients.")}
+function renderAbsent(rows){renderPatientRows("absentTable",rows,p=>[td(`#${p.position||p.ticket}`,"mono"),td(p.phone||"","mono"),td(p.name||""),td(formatTime(p.absentAt||p.timestamp)),actionCell([button("Recall",()=>callPatient(p),"primary"),button("Back to Queue",()=>restoreQueue(p))])],5,"No absent patients.")}
+function renderAppointments(rows){renderPatientRows("appointmentTable",rows,p=>[td(`#${p.position||p.ticket}`,"mono"),td(p.name||""),td(p.phone||"","mono"),td(formatTime(p.appointmentAt||p.rendezvousAt)),td(p.reason||""),actionCell([button("Call",()=>callPatient(p),"primary"),button("Edit",()=>openAppointment(p))])],6,"No rendez-vous patients.")}
+function renderPatientRows(id,rows,builder,colspan,emptyText){const body=document.getElementById(id);body.innerHTML="";if(!rows.length){const tr=document.createElement("tr");const c=td(emptyText);c.colSpan=colspan;c.className="empty";tr.append(c);body.append(tr);return}rows.forEach(p=>{const tr=document.createElement("tr");builder(p).forEach(c=>tr.append(c));body.append(tr)})}
+function renderHistory(rows){renderPatientRows("historyTable",rows,r=>[td(formatTime(r.timestamp)),td(`#${r.patientNumber||r.ticket||""}`,"mono"),td(r.phone||"","mono"),td(r.name||""),td(r.destination||r.room||""),badgeCell(r.status||"completed")],6,"No history yet.")}
+async function saveName(){const name=document.getElementById("nameInput")?.value.trim();if(!name)return toast("Enter the patient name",true);await runCommand("SET_NAME",{name},"Name saved")}
+async function callPatient(p){await runCommand("CALL_TICKET",{ticket:p.position||p.ticket,phone:p.phone||"",source:p.status||"queue"},`Calling patient #${p.position||p.ticket}`)}
+async function markAbsent(p){await runCommand("MARK_ABSENT",{ticket:p.position||p.ticket,phone:p.phone||""},"Patient moved to Absent")}
+async function restoreQueue(p){await runCommand("RESTORE_QUEUE",{ticket:p.position||p.ticket,phone:p.phone||""},"Patient returned to queue")}
+function openRoute(p){document.getElementById("routeTicket").value=p.position||p.ticket;openModal("routeModal")}
+function openAppointment(p){document.getElementById("appointmentTicket").value=p.position||p.ticket;const dt=p.appointmentAt||p.rendezvousAt;if(dt)document.getElementById("appointmentDate").value=toLocalInput(dt);document.getElementById("appointmentReason").value=p.reason||"";openModal("appointmentModal")}
+async function runCommand(type,extra,msg){const ok=await sendCommand(type,extra);toast(ok?msg:"Command failed. Check Apps Script support.",!ok);if(ok)await fetchState();return ok}
+document.getElementById("routeSave").onclick=async()=>{const ticket=document.getElementById("routeTicket").value,room=document.getElementById("routeRoom").value,note=document.getElementById("routeNote").value.trim();if(await runCommand("ROUTE_PATIENT",{ticket,room,note},`Patient routed to ${room}`))closeModal("routeModal")};
+document.getElementById("appointmentSave").onclick=async()=>{const ticket=document.getElementById("appointmentTicket").value,appointmentAt=document.getElementById("appointmentDate").value,reason=document.getElementById("appointmentReason").value.trim();if(!appointmentAt)return toast("Select rendez-vous date and time",true);if(await runCommand("SET_APPOINTMENT",{ticket,appointmentAt,reason},"Rendez-vous saved"))closeModal("appointmentModal")};
+document.getElementById("btnCall").onclick=()=>runCommand("CALL",{},"Calling next patient");document.getElementById("btnRefresh").onclick=()=>fetchState();document.getElementById("btnReset").onclick=async()=>{if(confirm("Reset the entire queue? This cannot be undone."))await runCommand("RESET",{},"Queue reset requested")};
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".tabs-content>section").forEach(x=>x.classList.remove("active"));document.getElementById(b.dataset.tab).classList.add("active");if(b.dataset.tab==="history")fetchHistory()});document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
+function button(text,fn,cls=""){const b=el("button",{class:`btn ${cls}`.trim()},text);b.type="button";b.onclick=fn;return b}function actionCell(btns){const c=td("");const d=el("div",{class:"actions"});btns.forEach(b=>d.append(b));c.append(d);return c}function badgeCell(status){const c=td("");c.append(el("span",{class:`badge ${String(status).toLowerCase()}`},status));return c}function td(text,cls=""){const c=document.createElement("td");if(cls)c.className=cls;c.textContent=text??"";return c}function el(tag,attrs={},children=[]){const n=document.createElement(tag);Object.entries(attrs).forEach(([k,v])=>k==="class"?n.className=v:k==="style"?n.setAttribute("style",v):n.setAttribute(k,v));(Array.isArray(children)?children:[children]).forEach(c=>n.append(typeof c==="string"?document.createTextNode(c):c));return n}function setText(id,v){document.getElementById(id).textContent=v}function formatTime(v){if(!v)return"";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString()}function toLocalInput(v){const d=new Date(v);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}function openModal(id){document.getElementById(id).classList.add("open")}function closeModal(id){document.getElementById(id).classList.remove("open")}function toast(msg,error=false){const t=document.getElementById("toast");t.textContent=msg;t.style.background=error?"#cc2f3f":"#1c8f63";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+document.getElementById("year").textContent=new Date().getFullYear();fetchState();autoTimer=setInterval(fetchState,AUTO_REFRESH_MS);
+</script>
+</body></html>
